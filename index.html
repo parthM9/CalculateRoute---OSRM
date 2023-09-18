@@ -42,6 +42,7 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+	var route;
 	var startMarker, endMarker;
     // Function to calculate and display the route
     function calculateRoute() {
@@ -55,7 +56,9 @@
             return;
         }
 
-
+		if (route) {
+            map.removeLayer(route);
+        }
         // Make an AJAX request to OSRM to calculate the route
         var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' + startLon + ',' + startLat + ';' + endLon + ',' + endLat;
         fetch(osrmUrl)
@@ -116,7 +119,6 @@ function decodePolyline(polyline) {
 
     return coordinates;
 }
-var route;
 // Decode the polyline data
 // Decode the polyline data
 var routeCoordinates = decodePolyline(data.routes[0].geometry);
