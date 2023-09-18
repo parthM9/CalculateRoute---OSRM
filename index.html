@@ -1,17 +1,91 @@
+<!DOCTYPE html>
 <html>
-
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Include Leaflet CSS and JavaScript -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+		h1 {
+        text-align: center; 
+        padding: 10px; 
+		}
+       body {
+			background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh; /* 100% of the viewport height */
+            margin: 0;
+        }
 
+        #map {
+            width: 90%; 
+            max-width: 700px; 
+            height: 400px;
+			border: 2px solid #ccc; /* Add a 2px solid gray border */
+			border-radius: 8px;
+            margin-bottom: 20px;
+        }
 
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .route-info {
+            width: 100%;
+            max-width: 800px; /* Adjust the max-width as needed */
+            margin-top: 20px; /* Add margin to separate from map */
+            padding: 20px; /* Add padding for styling */
+            border: 1px solid #ccc; /* Add a border for styling */
+            box-sizing: border-box; /* Ensure padding and border are included in width */
+        }
+
+        .coordinate-inputs {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="text"] {
+            width: 25%; /* Adjust the width as needed */
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Customize the text labels for start and end coordinates */
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        #calculateButton {
+            background-color: #007BFF; /* Change background color */
+            color: white; /* Change text color */
+            padding: 10px 20px; /* Add padding */
+            border: none; /* Remove the border */
+            cursor: pointer; /* Add a pointer cursor on hover */
+            border-radius: 5px; /* Add rounded corners */
+        }
+
+        /* Style the button on hover */
+        #calculateButton:hover {
+            background-color: #0056b3;
+    </style>
+</head>
+<body>
 <h1>Route Calculation and Display</h1>
 
 <!-- Create a map container -->
-<div id="map" style="width: 600px;height: 400px; position:center;"></div>
+<div id="map"></div>
 
 <!-- Input fields for start and end coordinates -->
 <div>
@@ -20,22 +94,25 @@
     <label for="startLon">Start Longitude:</label>
     <input type="text" id="startLon" />
 </div>
+</br>
 <div>
     <label for="endLat">End Latitude:</label>
     <input type="text" id="endLat" />
     <label for="endLon">End Longitude:</label>
     <input type="text" id="endLon" />
 </div>
+</br>
 <button id="calculateButton">Calculate Route</button>
 
 <!-- Display route information -->
-<div>
+<div class="route-info">
     <p><strong>Route Information:</strong></p>
     <p>Distance: <span id="distance"></span> kms</p>
     <p>Duration: <span id="duration"></span> minutes</p>
 	<p>Start Address: <span id="startAddress"></span></p>
     <p>End Address: <span id="endAddress"></span></p>
 </div>
+</body>
 <script>
     // Initialize the map
     var map = L.map('map').setView([-25.2744, 133.7751], 5); // Set initial coordinates and zoom level
