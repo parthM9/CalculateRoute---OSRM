@@ -1,0 +1,188 @@
+<html>
+
+<!-- Include Leaflet CSS and JavaScript -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<h1>Route Calculation and Display</h1>
+
+<!-- Create a map container -->
+<div id="map" style="width: 600px;height: 400px; position:center;"></div>
+
+<!-- Input fields for start and end coordinates -->
+<div>
+    <label for="startLat">Start Latitude:</label>
+    <input type="text" id="startLat" />
+    <label for="startLon">Start Longitude:</label>
+    <input type="text" id="startLon" />
+</div>
+<div>
+    <label for="endLat">End Latitude:</label>
+    <input type="text" id="endLat" />
+    <label for="endLon">End Longitude:</label>
+    <input type="text" id="endLon" />
+</div>
+<button id="calculateButton">Calculate Route</button>
+
+<!-- Display route information -->
+<div>
+    <p><strong>Route Information:</strong></p>
+    <p>Distance: <span id="distance"></span> kms</p>
+    <p>Duration: <span id="duration"></span> minutes</p>
+	<p>Start Address: <span id="startAddress"></span></p>
+    <p>End Address: <span id="endAddress"></span></p>
+</div>
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([0, 0], 13); // Set initial coordinates and zoom level
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+	var startMarker, endMarker;
+    // Function to calculate and display the route
+    function calculateRoute() {
+        var startLat = document.getElementById('startLat').value;
+        var startLon = document.getElementById('startLon').value;
+        var endLat = document.getElementById('endLat').value;
+        var endLon = document.getElementById('endLon').value;
+
+        if (!startLat || !startLon || !endLat || !endLon) {
+            console.error('Please enter valid coordinates for both start and end points.');
+            return;
+        }
+
+
+        // Make an AJAX request to OSRM to calculate the route
+        var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' + startLon + ',' + startLat + ';' + endLon + ',' + endLat;
+        fetch(osrmUrl)
+            .then(function (response) {
+                if (!response.ok) {
+                    console.error('Error:', response.status, response.statusText);
+                    return;
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                
+				console.log(data.routes[0]);
+                var distance = data.routes[0].distance; // Distance in meters
+                var duration = data.routes[0].duration; // Duration in seconds
+
+                // Display route information
+                document.getElementById('distance').textContent = (distance/1000) ;
+                document.getElementById('duration').textContent = (duration/60);
+				updateMarkersWithAddresses(startLat, startLon, endLat, endLon);
+				
+                // Extract route geometry and display it on the map
+               // Decode the polyline data
+// Function to decode a polyline encoded string
+function decodePolyline(polyline) {
+    var index = 0;
+    var lat = 0;
+    var lon = 0;
+    var coordinates = [];
+
+    while (index < polyline.length) {
+        var shift = 0;
+        var result = 0;
+
+        do {
+            var byte = polyline.charCodeAt(index++) - 63;
+            result |= (byte & 0x1f) << shift;
+            shift += 5;
+        } while (byte >= 0x20);
+
+        var dlat = (result & 1) != 0 ? ~(result >> 1) : result >> 1;
+        lat += dlat;
+
+        shift = 0;
+        result = 0;
+
+        do {
+            var byte = polyline.charCodeAt(index++) - 63;
+            result |= (byte & 0x1f) << shift;
+            shift += 5;
+        } while (byte >= 0x20);
+
+        var dlon = (result & 1) != 0 ? ~(result >> 1) : result >> 1;
+        lon += dlon;
+
+        coordinates.push([lat * 1e-5, lon * 1e-5]);
+    }
+
+    return coordinates;
+}
+var route;
+// Decode the polyline data
+// Decode the polyline data
+var routeCoordinates = decodePolyline(data.routes[0].geometry);
+
+// Create a polyline and add it to the map
+if (route) {
+    // Remove the existing polyline if it exists
+    map.removeLayer(route);
+}
+
+route = L.polyline(routeCoordinates, { color: 'blue' }).addTo(map);
+
+// Fit the map bounds to the route's bounds
+map.fitBounds(route.getBounds());
+
+
+
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+            });
+    }
+
+    // Bind the click event to the "Calculate Route" button
+    document.getElementById('calculateButton').addEventListener('click', calculateRoute);
+	function updateMarkersWithAddresses(startLat, startLon, endLat, endLon) {
+            // Remove existing markers if they exist
+            if (startMarker) {
+                map.removeLayer(startMarker);
+            }
+            if (endMarker) {
+                map.removeLayer(endMarker);
+            }
+
+            // Create markers with coordinates
+            startMarker = L.marker([startLat, startLon]).addTo(map);
+            endMarker = L.marker([endLat, endLon]).addTo(map);
+reverseGeocode(startLat, startLon, function (startAddress) {
+                document.getElementById('startAddress').textContent = startAddress;
+                startMarker.bindPopup('Start Address: ' + startAddress);
+            });
+
+            reverseGeocode(endLat, endLon, function (endAddress) {
+                document.getElementById('endAddress').textContent = endAddress;
+                endMarker.bindPopup('End Address: ' + endAddress);
+            });
+        }
+
+        // Function to perform reverse geocoding using Nominatim API
+        function reverseGeocode(lat, lon, callback) {
+            var nominatimUrl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + lat + '&lon=' + lon;
+            $.ajax({
+                url: nominatimUrl,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var address = data.display_name;
+                    callback(address);
+                },
+                error: function (error) {
+                    console.error('Reverse geocoding error:', error);
+                    callback('Address not available');
+                }
+            });
+        }
+
+</script>
+
+</html>
