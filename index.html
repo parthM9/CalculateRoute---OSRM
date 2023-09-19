@@ -88,19 +88,21 @@
 <div id="map"></div>
 
 <!-- Input fields for start and end coordinates -->
+<!-- Input fields for start and end coordinates with default values -->
 <div>
     <label for="startLat">Start Latitude:</label>
-    <input type="text" id="startLat" />
+    <input type="text" id="startLat" value="-37.8221461" /> <!-- Default value for start latitude -->
     <label for="startLon">Start Longitude:</label>
-    <input type="text" id="startLon" />
+    <input type="text" id="startLon" value="145.0363797" /> <!-- Default value for start longitude -->
 </div>
 </br>
 <div>
     <label for="endLat">End Latitude:</label>
-    <input type="text" id="endLat" />
+    <input type="text" id="endLat" value="-38.0065535" /> <!-- Default value for end latitude -->
     <label for="endLon">End Longitude:</label>
-    <input type="text" id="endLon" />
+    <input type="text" id="endLon" value="145.1976763" /> <!-- Default value for end longitude -->
 </div>
+
 </br>
 <button id="calculateButton">Calculate Route</button>
 
@@ -218,7 +220,7 @@ map.fitBounds(route.getBounds());
                 console.error('Error:', error);
             });
     }
-
+	calculateRoute();
     // Bind the click event to the "Calculate Route" button
     document.getElementById('calculateButton').addEventListener('click', calculateRoute);
 	function updateMarkersWithAddresses(startLat, startLon, endLat, endLon) {
