@@ -10,6 +10,11 @@
      crossorigin=""></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style>
+@media (max-width: 576px) {
+        #map {
+            height: 200px;
+        }
+    }
 		h1 {
         text-align: center; 
         padding: 10px; 
@@ -85,8 +90,7 @@
 <h1>Route Calculation and Display</h1>
 
 <!-- Create a map container -->
-<div id="map"></div>
-
+ <div id="map" style="height: 400px; width: 100%;"></div>
 <!-- Input fields for start and end coordinates -->
 <!-- Input fields for start and end coordinates with default values -->
 <div>
